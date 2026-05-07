@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: minimarket-pos-backend
+Version: 0.1.0
+Summary: Backend para sistema POS e inventario de minimarket
+Requires-Python: >=3.11
+Requires-Dist: alembic<2.0,>=1.13
+Requires-Dist: email-validator<3.0,>=2.1
+Requires-Dist: fastapi<1.0,>=0.110
+Requires-Dist: passlib[bcrypt]<2.0,>=1.7
+Requires-Dist: psycopg[binary]<4.0,>=3.1
+Requires-Dist: pydantic-settings<3.0,>=2.2
+Requires-Dist: python-jose[cryptography]<4.0,>=3.3
+Requires-Dist: python-multipart<1.0,>=0.0.9
+Requires-Dist: sqlalchemy<3.0,>=2.0
+Requires-Dist: uvicorn[standard]<1.0,>=0.29
