@@ -35,6 +35,7 @@ class Purchase(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     supplier: Mapped["Supplier"] = relationship(back_populates="purchases")
     user: Mapped["User"] = relationship(back_populates="purchase_orders")
     details: Mapped[list["PurchaseDetail"]] = relationship(back_populates="purchase", cascade="all, delete-orphan")
+    inventory_movements: Mapped[list["InventoryMovement"]] = relationship(back_populates="purchase")
 
 
 class PurchaseDetail(UUIDPrimaryKeyMixin, TimestampMixin, Base):

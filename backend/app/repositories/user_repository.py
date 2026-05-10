@@ -14,6 +14,10 @@ class RoleRepository(BaseRepository[Role]):
     def get_by_name(self, name: str) -> Role | None:
         return self.db.scalar(select(Role).where(Role.name == name))
 
+    def list(self) -> list[Role]:
+        stmt = select(Role).order_by(Role.name.asc())
+        return list(self.db.scalars(stmt).all())
+
 
 class UserRepository(BaseRepository[User]):
     def __init__(self, db: Session) -> None:
@@ -25,6 +29,10 @@ class UserRepository(BaseRepository[User]):
 
     def get_by_username(self, username: str) -> User | None:
         stmt = select(User).options(joinedload(User.role)).where(User.username == username)
+        return self.db.scalar(stmt)
+
+    def get_by_email(self, email: str) -> User | None:
+        stmt = select(User).options(joinedload(User.role)).where(User.email == email)
         return self.db.scalar(stmt)
 
     def list(self) -> list[User]:

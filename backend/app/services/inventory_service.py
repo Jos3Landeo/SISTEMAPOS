@@ -33,9 +33,13 @@ class InventoryService:
                 product = self.products.get_by_id(str(line.product_id))
                 if not product:
                     raise AppError("Producto no encontrado en ajuste", status.HTTP_404_NOT_FOUND)
+                if not product.allows_decimal and Decimal(line.quantity) % 1 != 0:
+                    raise AppError(f"El producto {product.name} no permite fracciones", status.HTTP_409_CONFLICT)
 
                 previous_stock = Decimal(product.stock_current)
                 new_stock = previous_stock + Decimal(line.quantity)
+                if new_stock < 0:
+                    raise AppError(f"El ajuste deja stock negativo para {product.name}", status.HTTP_409_CONFLICT)
                 product.stock_current = new_stock
 
                 detail = StockAdjustmentDetail(
@@ -48,7 +52,7 @@ class InventoryService:
                 movement = InventoryMovement(
                     product_id=product.id,
                     stock_adjustment_id=adjustment.id,
-                    movement_type="adjustment",
+                    movement_type="adjustment_in" if Decimal(line.quantity) > 0 else "adjustment_out",
                     quantity=line.quantity,
                     previous_stock=previous_stock,
                     new_stock=new_stock,

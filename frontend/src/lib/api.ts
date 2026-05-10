@@ -19,9 +19,15 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: "Error inesperado" }));
-    throw new Error(error.detail ?? "Error inesperado");
+    const detail = error.detail;
+    if (Array.isArray(detail)) {
+      const message = detail
+        .map((item) => item.msg || item.message || JSON.stringify(item))
+        .join(". ");
+      throw new Error(message || "Error de validacion");
+    }
+    throw new Error(typeof detail === "string" ? detail : "Error inesperado");
   }
 
   return response.json() as Promise<T>;
 }
-

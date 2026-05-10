@@ -22,6 +22,8 @@ class UserService:
             raise AppError("Rol no encontrado", status.HTTP_404_NOT_FOUND)
         if self.users.get_by_username(payload.username):
             raise AppError("El nombre de usuario ya existe", status.HTTP_409_CONFLICT)
+        if payload.email and self.users.get_by_email(payload.email):
+            raise AppError("El correo ya existe", status.HTTP_409_CONFLICT)
 
         user = self.users.create(
             {
@@ -47,8 +49,16 @@ class UserService:
             role = self.roles.get_by_id(data["role_id"])
             if not role:
                 raise AppError("Rol no encontrado", status.HTTP_404_NOT_FOUND)
+        if "username" in data and data["username"]:
+            existing_user = self.users.get_by_username(data["username"])
+            if existing_user and str(existing_user.id) != user_id:
+                raise AppError("El nombre de usuario ya existe", status.HTTP_409_CONFLICT)
+        if "email" in data and data["email"]:
+            existing_user = self.users.get_by_email(data["email"])
+            if existing_user:
+                if str(existing_user.id) != user_id:
+                    raise AppError("El correo ya existe", status.HTTP_409_CONFLICT)
 
         updated = self.users.update(user, data)
         self.db.commit()
         return self.users.get_by_id(str(updated.id)) or updated
-

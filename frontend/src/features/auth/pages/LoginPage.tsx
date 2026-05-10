@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "../../../components/ui/Button";
+import { PERMISSION_POS, hasPermission } from "../access";
 import { authService } from "../services/authService";
 import { useAuthStore } from "../hooks/useAuth";
 
@@ -21,7 +22,7 @@ export function LoginPage() {
     try {
       const session = await authService.login({ username, password });
       setSession(session);
-      navigate("/");
+      navigate(hasPermission(session.user, PERMISSION_POS) ? "/cash" : "/");
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "No fue posible iniciar sesion");
     } finally {
@@ -92,4 +93,3 @@ export function LoginPage() {
     </main>
   );
 }
-

@@ -30,6 +30,7 @@ class InventoryMovement(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     product: Mapped["Product"] = relationship(back_populates="inventory_movements")
     sale: Mapped[Sale | None] = relationship(back_populates="inventory_movements")
+    purchase: Mapped[Purchase | None] = relationship(back_populates="inventory_movements")
     stock_adjustment: Mapped[StockAdjustment | None] = relationship(back_populates="movements")
 
 

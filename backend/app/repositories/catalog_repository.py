@@ -32,6 +32,20 @@ class ProductRepository(BaseRepository[Product]):
         )
         return self.db.scalar(stmt)
 
+    def get_by_barcode(self, barcode: str) -> Product | None:
+        stmt = select(Product).options(joinedload(Product.category)).where(Product.barcode == barcode)
+        return self.db.scalar(stmt)
+
+    def get_by_internal_code(self, internal_code: str | None) -> Product | None:
+        if not internal_code:
+            return None
+        stmt = (
+            select(Product)
+            .options(joinedload(Product.category))
+            .where(Product.internal_code == internal_code)
+        )
+        return self.db.scalar(stmt)
+
     def search(self, term: str) -> list[Product]:
         like = f"%{term}%"
         stmt = (

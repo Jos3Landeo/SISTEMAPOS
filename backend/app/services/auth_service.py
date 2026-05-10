@@ -1,6 +1,7 @@
 from fastapi import status
 from sqlalchemy.orm import Session
 
+from app.core.constants import ROLE_PERMISSIONS
 from app.core.exceptions import AppError
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.user import User
@@ -20,9 +21,27 @@ class AuthService:
 
         admin_role = self.roles.get_by_name("admin")
         if not admin_role:
-            admin_role = self.roles.create({"name": "admin", "description": "Administrador general"})
-            self.roles.create({"name": "cashier", "description": "Operacion de caja"})
-            self.roles.create({"name": "manager", "description": "Gestion operativa"})
+            admin_role = self.roles.create(
+                {
+                    "name": "admin",
+                    "description": "Administrador general",
+                    "permissions": ROLE_PERMISSIONS["admin"],
+                }
+            )
+            self.roles.create(
+                {
+                    "name": "cashier",
+                    "description": "Operacion de caja",
+                    "permissions": ROLE_PERMISSIONS["cashier"],
+                }
+            )
+            self.roles.create(
+                {
+                    "name": "manager",
+                    "description": "Gestion operativa",
+                    "permissions": ROLE_PERMISSIONS["manager"],
+                }
+            )
 
         user = self.users.create(
             {
@@ -44,4 +63,3 @@ class AuthService:
             raise AppError("Usuario inactivo", status.HTTP_403_FORBIDDEN)
 
         return create_access_token(str(user.id)), user
-

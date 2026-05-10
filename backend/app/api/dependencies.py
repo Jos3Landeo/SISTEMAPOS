@@ -28,3 +28,30 @@ def get_current_user(db: DBSession, token: Annotated[str, Depends(oauth2_scheme)
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
+
+def require_permissions(*permissions: str):
+    def dependency(current_user: CurrentUser) -> User:
+        granted_permissions = set(current_user.role.permissions or [])
+        if all(permission in granted_permissions for permission in permissions):
+            return current_user
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permisos para realizar esta accion",
+        )
+
+    return dependency
+
+
+def require_any_permission(*permissions: str):
+    def dependency(current_user: CurrentUser) -> User:
+        granted_permissions = set(current_user.role.permissions or [])
+        if any(permission in granted_permissions for permission in permissions):
+            return current_user
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tienes permisos para realizar esta accion",
+        )
+
+    return dependency

@@ -2,6 +2,7 @@ export type Role = {
   id: string;
   name: string;
   description?: string | null;
+  permissions: string[];
 };
 
 export type User = {
@@ -23,4 +24,3 @@ export type AuthResponse = {
   token_type: string;
   user: User;
 };
-

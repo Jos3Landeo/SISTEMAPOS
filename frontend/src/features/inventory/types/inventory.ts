@@ -12,3 +12,11 @@ export type InventoryMovement = {
   product: Product;
 };
 
+export type StockAdjustmentPayload = {
+  reason: string;
+  notes?: string | null;
+  details: Array<{
+    product_id: string;
+    quantity: number;
+  }>;
+};

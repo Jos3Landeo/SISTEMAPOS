@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from app.schemas.common import TimestampedSchema
 from app.schemas.payment_method import PaymentMethodRead
 from app.schemas.product import ProductRead
+from app.schemas.user import UserRead
 
 
 class SaleDetailCreate(BaseModel):
@@ -26,12 +27,15 @@ class SalePaymentCreate(BaseModel):
 class SaleCreate(BaseModel):
     cash_session_id: UUID | None = None
     notes: str | None = None
+    discount_amount: Decimal = Field(default=Decimal("0.00"), ge=0)
     details: list[SaleDetailCreate]
     payments: list[SalePaymentCreate]
 
 
 class SaleCancellationRequest(BaseModel):
-    reason: str = Field(min_length=5, max_length=300)
+    reason: str | None = Field(default=None, min_length=5, max_length=300)
+    reason_code: str | None = Field(default=None, min_length=2, max_length=60)
+    notes: str | None = Field(default=None, max_length=500)
 
 
 class SaleDetailRead(TimestampedSchema):
@@ -63,6 +67,7 @@ class SaleRead(TimestampedSchema):
     notes: str | None = None
     cancelled_at: datetime | None = None
     cancellation_reason: str | None = None
+    user: UserRead
     details: list[SaleDetailRead]
     payments: list[SalePaymentRead]
 

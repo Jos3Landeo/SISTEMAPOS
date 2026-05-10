@@ -1,19 +1,49 @@
-import { Barcode, Boxes, LayoutDashboard, LineChart, LogOut } from "lucide-react";
+import { Barcode, Boxes, Building2, LayoutDashboard, LineChart, LogOut, PackagePlus, Settings, ShoppingCart, Tags, UsersRound, WalletCards } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 
+import {
+  type AppPermission,
+  PERMISSION_CATEGORIES,
+  PERMISSION_CASHIERS,
+  PERMISSION_INVENTORY,
+  PERMISSION_POS,
+  PERMISSION_PRODUCTS,
+  PERMISSION_REPORTS,
+  PERMISSION_SETTINGS,
+  hasPermission,
+} from "../../features/auth/access";
 import { useAuthStore } from "../../features/auth/hooks/useAuth";
+import { useCurrentCashSession } from "../../features/cash/hooks/useCash";
 
-const navigation = [
+type NavigationItem = {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  end?: boolean;
+  permission?: AppPermission;
+};
+
+const navigation: NavigationItem[] = [
   { to: "/", label: "Resumen", icon: LayoutDashboard, end: true },
-  { to: "/pos", label: "POS", icon: Barcode },
-  { to: "/products", label: "Productos", icon: Boxes },
-  { to: "/inventory", label: "Inventario", icon: Boxes },
-  { to: "/reports", label: "Reportes", icon: LineChart },
+  { to: "/cash", label: "Caja", icon: WalletCards, permission: PERMISSION_POS },
+  { to: "/pos", label: "POS", icon: Barcode, permission: PERMISSION_POS },
+  { to: "/products/list", label: "Productos", icon: Boxes, permission: PERMISSION_PRODUCTS },
+  { to: "/products/new", label: "Nuevo producto", icon: PackagePlus, permission: PERMISSION_PRODUCTS },
+  { to: "/categories", label: "Categorias", icon: Tags, permission: PERMISSION_CATEGORIES },
+  { to: "/suppliers", label: "Proveedores", icon: Building2, permission: PERMISSION_INVENTORY },
+  { to: "/purchases", label: "Compras", icon: ShoppingCart, permission: PERMISSION_INVENTORY },
+  { to: "/inventory", label: "Inventario", icon: Boxes, permission: PERMISSION_INVENTORY },
+  { to: "/reports", label: "Reportes", icon: LineChart, permission: PERMISSION_REPORTS },
+  { to: "/cashiers", label: "Cajeros", icon: UsersRound, permission: PERMISSION_CASHIERS },
+  { to: "/settings", label: "Config", icon: Settings, permission: PERMISSION_SETTINGS },
 ];
 
 export function AdminLayout() {
   const user = useAuthStore((state) => state.user);
   const clearSession = useAuthStore((state) => state.clearSession);
+  const canUsePos = hasPermission(user, PERMISSION_POS);
+  const { data: currentCashSession } = useCurrentCashSession(canUsePos);
+  const visibleNavigation = navigation.filter((item) => !item.permission || hasPermission(user, item.permission));
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[240px_minmax(0,1fr)]">
@@ -24,7 +54,7 @@ export function AdminLayout() {
         </div>
 
         <nav className="mt-8 space-y-1">
-          {navigation.map(({ to, label, icon: Icon, end }) => (
+          {visibleNavigation.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -63,7 +93,13 @@ export function AdminLayout() {
               <p className="text-sm text-slate-500">Operacion local</p>
               <p className="text-lg font-semibold text-slate-950">Control de ventas e inventario</p>
             </div>
-            <div className="rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-600">Caja lista para operar</div>
+            <div className="rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-600">
+              {canUsePos
+                ? currentCashSession
+                  ? `${currentCashSession.cash_register.name} abierta`
+                  : "Caja pendiente de apertura"
+                : "Panel administrativo"}
+            </div>
           </div>
         </header>
 
@@ -74,4 +110,3 @@ export function AdminLayout() {
     </div>
   );
 }
-

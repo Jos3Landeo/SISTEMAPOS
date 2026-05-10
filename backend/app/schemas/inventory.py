@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.schemas.common import TimestampedSchema
 from app.schemas.product import ProductRead
@@ -26,6 +26,13 @@ class StockAdjustmentLineCreate(BaseModel):
     product_id: UUID
     quantity: Decimal
 
+    @field_validator("quantity")
+    @classmethod
+    def validate_non_zero_quantity(cls, value: Decimal) -> Decimal:
+        if value == 0:
+            raise ValueError("La cantidad del ajuste no puede ser cero")
+        return value
+
 
 class StockAdjustmentCreate(BaseModel):
     reason: str = Field(min_length=3, max_length=160)
@@ -47,4 +54,3 @@ class StockAdjustmentRead(TimestampedSchema):
     notes: str | None = None
     status: str
     details: list[StockAdjustmentDetailRead]
-
